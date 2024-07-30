@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply bg-gradient-to-bl from-violet-600 to-indigo-600 bg-no-repeat min-h-screen
+}
+.main {
+    @apply flex align-middle items-center
+}
+.main-zone {
+    @apply container mx-auto p-4 my-8;
+}
+.main-zone h1 {
+    @apply text-3xl font-bold mb-8 text-white text-center;
+}
+.dragdrop-container {
+    @apply border-dashed border-2 rounded-lg p-6 mb-4 cursor-pointer text-center backdrop-blur-sm bg-white/50 shadow-2xl hover:bg-white/30 transition;
+}
+.dragdrop-container svg {
+    @apply mx-auto max-w-48
+}
+.dragdrop-container p {
+    @apply  font-semibold
+}
+.main-progress {
+    @apply my-4 p-4 rounded-lg backdrop-blur-sm bg-white/50 shadow-2xl
+}
+.progress-container {
+    @apply w-full bg-gray-200 rounded-full h-2.5
+}
+.progress-bar {
+    @apply bg-indigo-600 h-2.5 rounded-full
+}
+.progress-percent {
+    @apply text-center mt-2 font-semibold
+}
+.main-output {
+    @apply my-4 p-4 rounded-lg backdrop-blur-sm bg-white/50 shadow-2xl
+}
+.main-output h2 {
+    @apply text-2xl mb-4
+}
+.main-output__li {
+    @apply my-4 block md:flex gap-4 justify-between font-semibold 
+}
+.li-info {
+    @apply block md:flex align-middle gap-4 justify-between
+}
+.info {
+    @apply block md:flex gap-4 justify-between
+}
+.thumb {
+    @apply w-12 h-12 inline-block mr-4
+}
+.download-image {
+    @apply flex items-center justify-center text-white font-semibold text-center px-8 min-h-9 shadow-md rounded-lg bg-indigo-600 hover:bg-indigo-900 transition
+}
+.download-image-all {
+    @apply flex items-center text-white font-semibold text-center mt-8 px-8 py-4 shadow-md rounded-lg bg-indigo-600 hover:bg-indigo-900 transition
+}
+.text-zone {
+    @apply container mx-auto p-4 mt-12 mb-4 text-white text-lg
+}
+.text-zone h4 {
+    @apply font-semibold text-xl mt-4 mb-2
+}
+.how-it-work {
+    @apply list-decimal indent-2 ml-4;
+}

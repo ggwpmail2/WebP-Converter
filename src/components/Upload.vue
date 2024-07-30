@@ -1,0 +1,130 @@
+<template>
+
+    <div class="dragdrop-container" @drop.prevent="handleDrop" @dragover.prevent @click="openFileDialog">
+        <input type="file" class="hidden" ref="fileInput" @change="handleFileUpload" accept=".jpg, .jpeg, .png, .webp"
+            multiple />
+        <svg xmlns="http://www.w3.org/2000/svg" width="457" height="360" fill="none" viewBox="0 0 457 360">
+            <path stroke="#DB00FF" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"
+                d="M116.924 295.733c-8.834 3.5-34.3 7.4-65.5-5-31.2-12.4-44-46.166-46.5-61.499-2.167-11.667-1.9-40.3 16.5-61.5 7.25-8.355 13.445-13.541 18.535-16.85 8.842-5.75 16.558-12.987 20.428-22.799 10.046-25.471 32.751-56.628 74.254-63.167 11.939-1.881 23.021-8.278 29.986-18.155 11.256-15.96 28.036-32.566 48.797-38.03 28.5-7.5 62.5-5 90 0 42.729 7.77 57.922 45.327 66.713 71.316 3.033 8.967 10.164 15.712 18.667 19.872 88.712 43.403 95.848 191.05-49.88 195.812m-303.5-56.999c-4.667-21.667-2.4-66.7 44-73.5m293-37.001c26.833 18.5 66.8 68.101 12 118.501m-120-5c-110 8.5-122-35.001-119.5 104.499m0 0 28-23.5m-28 23.5-14-11.75-14-11.75m67.652 29.034C320.653 363.533 308 354.767 308 240m0 0 30.924 25.5M308 240l-31 25.5" />
+            <path stroke="url(#a)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"
+                d="M116.924 295.733c-8.834 3.5-34.3 7.4-65.5-5-31.2-12.4-44-46.166-46.5-61.499-2.167-11.667-1.9-40.3 16.5-61.5 7.25-8.355 13.445-13.541 18.535-16.85 8.842-5.75 16.558-12.987 20.428-22.799 10.046-25.471 32.751-56.628 74.254-63.167 11.939-1.881 23.021-8.278 29.986-18.155 11.256-15.96 28.036-32.566 48.797-38.03 28.5-7.5 62.5-5 90 0 42.729 7.77 57.922 45.327 66.713 71.316 3.033 8.967 10.164 15.712 18.667 19.872 88.712 43.403 95.848 191.05-49.88 195.812m-303.5-56.999c-4.667-21.667-2.4-66.7 44-73.5m293-37.001c26.833 18.5 66.8 68.101 12 118.501m-120-5c-110 8.5-122-35.001-119.5 104.499m0 0 28-23.5m-28 23.5-14-11.75-14-11.75m67.652 29.034C320.653 363.533 308 354.767 308 240m0 0 30.924 25.5M308 240l-31 25.5" />
+            <defs>
+                <linearGradient id="a" x1="228.258" x2="228.258" y1="4" y2="346.233" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#8F00FF" stop-opacity="0" />
+                    <stop offset="1" stop-color="#8F00FF" />
+                </linearGradient>
+            </defs>
+        </svg>
+        <p>Перетащите изображения формата jpg или png для конвертации в webp</p>
+    </div>
+    <div v-if="progress > 0 && progress != 100" class="main-progress">
+        <div class="progress-container">
+            <div class="progress-bar" :style="{ width: progress + '%' }"></div>
+        </div>
+        <p class="progress-percent">{{ progress }}%</p>
+    </div>
+    <div v-if="images.length" class="main-output">
+        <h2>Конвертированные изображения</h2>
+        <ul>
+            <li v-for="image in images" :key="image.id" class="main-output__li">
+                <div class="li-info">
+                    <img :src="image.thumbnail" alt="image.name" class="thumb" />
+                    <div>
+                        <p>{{ image.name }}</p>
+                        <div class="info">
+                            <p>Оригинальный размер: {{ image.originalSize.toFixed(2) }} KB</p>
+                            <p>Конвертированный размер: {{ image.convertedSize.toFixed(2) }} KB</p>
+                            <p>Сжатие: {{ image.compression }}%</p>
+                        </div>
+                    </div>
+                </div>
+                <a :href="image.downloadUrl" class="download-image" download>Скачать</a>
+            </li>
+        </ul>
+        <button @click="downloadAll" class="download-image-all">Скачать архивом</button>
+    </div>
+
+</template>
+
+<script>
+import { ref } from 'vue';
+
+export default {
+    setup() {
+        const images = ref([]);
+        const fileInput = ref(null);
+        const progress = ref(0);
+
+        const handleFileUpload = async (event) => {
+            const files = event.target.files;
+            await processFiles(files);
+        };
+
+        const handleDrop = async (event) => {
+            const files = event.dataTransfer.files;
+            await processFiles(files);
+        };
+
+        const processFiles = async (files) => {
+            progress.value = 0;
+            const totalFiles = files.length;
+            let processedFiles = 0;
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch('https://convert.wslx.ru/api/convert.php', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+                if (!data.error) {
+                    images.value.push(data);
+                    processedFiles++;
+                    progress.value = Math.round((processedFiles / totalFiles) * 100);
+                } else {
+                    console.error(data.error);
+                }
+            }
+        };
+
+        const openFileDialog = () => {
+            fileInput.value.click();
+        };
+
+        const downloadAll = async () => {
+            const response = await fetch('https://convert.wslx.ru/api/download_all.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ images: images.value.map(image => image.downloadUrl) }),
+            });
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'images.zip';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        };
+
+        return {
+            handleFileUpload,
+            handleDrop,
+            images,
+            fileInput,
+            openFileDialog,
+            downloadAll,
+            progress,
+        };
+    },
+};
+</script>
+
+<style></style>
